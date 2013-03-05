@@ -216,11 +216,11 @@
 			?>
 			
 			<ol>
-			{exp:twittero screen_name="willans"
-			consumer_key="lDbqIkinxjZlZzSSkVa4Qg"
-			consumer_secret="hvBAIee48xu1V8Hil80xLEXhQTaTKzXfzTd6Dwb8OM"
-			oauth_token="15032349-vnAAmEe78gOgXDn5OlNaltSkREMbXA9aDNR6QyHzO"
-			oauth_token_secret="YqH3rWX0IOSXMEpbpggpT8lx8j44hCnQrcehGpONIpE"}
+			{exp:twittero screen_name="your_twitter_username"
+			consumer_key="lDbqIkinxjhfddZlZz456SdsfdfgSkVa4Qg"
+			consumer_secret="hvBAIee46j48dfxu1V18Hhdil80xLEXhQTaTKf3zXfzT5d6Dwb8OM"
+			oauth_token="15032349-vtnAAmEe78gOgXDn5OfsddlarewdNaltSkREMbXA9aD74NR6QyHzO"
+			oauth_token_secret="YqH3rdWX0IOfaSXMEpbpg546gpsdfT8lgx8j44hCnQrcehGpONIpE"}
 			<li>{twittero_tweet} {twittero_time}</li>
 			{/exp:twittero}
 			</ol>	
