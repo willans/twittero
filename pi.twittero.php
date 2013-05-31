@@ -71,7 +71,8 @@
 	function grab_new_tweets($cache_file, $format) {
 		
 		$connection = getConnectionWithAccessToken();
-		
+
+		log_message('debug',__METHOD__." : getting new tweets for ".SCREEN_NAME);
 		$tweets = $connection->get('statuses/user_timeline', array('screen_name' => SCREEN_NAME, 'include_rts' => INCLUDE_RETWEETS, 'count' => TWEETS_TO_GRAB));
 		
 		global $html;
@@ -99,15 +100,17 @@
 				if ($i == (TWEETS_TO_DISPLAY + 1)) break;
 				
 			}
-		
-			$fh = fopen($cache_file, 'w+');
-			fwrite($fh, $html);
-			fclose($fh);
-			
+
+			if ( CACHE_LIMIT !== 0 ) {
+				$fh = fopen($cache_file, 'w+');
+				fwrite($fh, $html);
+				fclose($fh);
+			}
+
 		} else {
 			
 			// If twitter can't be accessed, show what's already in the cache file. If it's empty, show an apology.						
-			if (filesize($cache_file) == 0) {
+			if ( (CACHE_LIMIT === 0) || (filesize($cache_file) == 0) ) {
 				$html .= '<p>Sorry. Twitter seems to be unavailable at the moment.</p>';			
 			} else {		
 				$fh = fopen($cache_file, 'r');
@@ -124,10 +127,11 @@
 	function display_tweets($cache_file, $html) {
 		
 		global $theTweets;
-		
-		if (filesize($cache_file) == 0) {
+
+		if ( (CACHE_LIMIT === 0) || (filesize($cache_file) == 0) ) {
 			return $html;				
-		} else {		
+		} else {
+			log_message('debug',__METHOD__." : getting ".SCREEN_NAME." tweets from cache");		
 			$fh = fopen($cache_file, 'r');
 			$theTweets = fread($fh, filesize($cache_file));
 			fclose($fh);
@@ -137,13 +141,20 @@
 	}
 
 	function twitterMagic($twittero_format) {
-		
-		session_start();
+
+		@session_start();
 		require_once('twitteroauth.php');
 		
-		$cache_file = APPPATH . "cache/twittero.txt";
-		
+		$cache_file = APPPATH . "cache/twittero." . SCREEN_NAME . ".txt";
+
+
+		if (CACHE_LIMIT === 0) {
+			$tweets = grab_new_tweets($cache_file, $twittero_format);
+			return $tweets;
+		}
+
 		// Create file if it doesn't exist
+		
 		if (!file_exists($cache_file)) {
 			$cacheHandle = fopen($cache_file, 'w') or die("can't open file");
 			fclose($cacheHandle);
@@ -189,7 +200,9 @@
 			define('SCREEN_NAME', $this->EE->TMPL->fetch_param('screen_name'));
 			define('INCLUDE_RETWEETS', $this->EE->TMPL->fetch_param('include_retweets') ? $this->EE->TMPL->fetch_param('include_retweets') : 'true');
 			define('SHOW_REPLIES', $this->EE->TMPL->fetch_param('show_replies') ? $this->EE->TMPL->fetch_param('show_replies') : 'true');
-			define('CACHE_LIMIT', ($this->EE->TMPL->fetch_param('cache_limit') || $this->EE->TMPL->fetch_param('cache_limit') === 0) ? $this->EE->TMPL->fetch_param('cache_limit') : 30);
+			define('CACHE_LIMIT', ($this->EE->TMPL->fetch_param('cache_limit') || $this->EE->TMPL->fetch_param('cache_limit') === "0") ?  intval($this->EE->TMPL->fetch_param('cache_limit')) : 30);
+			//log_message('debug',__METHOD__.": CACHE_LIMIT = [".CACHE_LIMIT."]");
+			
 			define('TIME_FORMAT', $this->EE->TMPL->fetch_param('time_format') ? str_replace('%', '', $this->EE->TMPL->fetch_param('time_format')) : 'F m, Y g:i a');
 			define('WORDED_TIMES', $this->EE->TMPL->fetch_param('worded_times') ? $this->EE->TMPL->fetch_param('worded_times') : 'true');
 			define('TWEETS_TO_GRAB', $this->EE->TMPL->fetch_param('tweets_to_grab') ? $this->EE->TMPL->fetch_param('tweets_to_grab') : 10);
