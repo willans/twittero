@@ -138,7 +138,7 @@
 
 	function twitterMagic($twittero_format) {
 		
-		session_start();
+		if(!session_id()){ session_start(); }
 		require_once('twitteroauth.php');
 		
 		$cache_file = APPPATH . "cache/twittero.txt";
