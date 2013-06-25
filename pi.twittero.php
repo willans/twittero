@@ -2,7 +2,7 @@
 
 	$plugin_info       = array(
 	'pi_name'        => 'Twittero',
-	'pi_version'     => '0.7',
+	'pi_version'     => '0.8',
 	'pi_author'      => 'Strawberry',
 	'pi_author_url'  => 'http://strawberry.co.uk',
 	'pi_description' => 'Pull in latest tweets using oAuth - Stops issue of 150 request per hour limit',
@@ -100,14 +100,16 @@
 				
 			}
 		
-			$fh = fopen($cache_file, 'w+');
-			fwrite($fh, $html);
-			fclose($fh);
+			if (CACHE_LIMIT !== 0) {
+				$fh = fopen($cache_file, 'w+');
+				fwrite($fh, $html);
+				fclose($fh);
+			}
 			
 		} else {
 			
 			// If twitter can't be accessed, show what's already in the cache file. If it's empty, show an apology.						
-			if (filesize($cache_file) == 0) {
+			if ((CACHE_LIMIT === 0) || (filesize($cache_file) == 0)) {
 				$html .= '<p>Sorry. Twitter seems to be unavailable at the moment.</p>';			
 			} else {		
 				$fh = fopen($cache_file, 'r');
@@ -125,7 +127,7 @@
 		
 		global $theTweets;
 		
-		if (filesize($cache_file) == 0) {
+		if ((CACHE_LIMIT === 0) || (filesize($cache_file) == 0)) {
 			return $html;				
 		} else {		
 			$fh = fopen($cache_file, 'r');
@@ -138,10 +140,10 @@
 
 	function twitterMagic($twittero_format) {
 		
-		session_start();
+		if(!session_id()){ session_start(); }
 		require_once('twitteroauth.php');
 		
-		$cache_file = APPPATH . "cache/twittero.txt";
+		$cache_file = APPPATH . "cache/twittero." . SCREEN_NAME . ".txt";
 		
 		// Create file if it doesn't exist
 		if (!file_exists($cache_file)) {
@@ -164,7 +166,7 @@
 		
 		$format = $twittero_format;
 
-		if (filesize($cache_file) == 0) {
+		if ((CACHE_LIMIT === 0) || (filesize($cache_file) == 0)) {
 			$tweets = grab_new_tweets($cache_file, $format);
 		} else if ($time_difference >= $how_often_new_tweets) {
 			$tweets = grab_new_tweets($cache_file, $format);	
@@ -189,7 +191,7 @@
 			define('SCREEN_NAME', $this->EE->TMPL->fetch_param('screen_name'));
 			define('INCLUDE_RETWEETS', $this->EE->TMPL->fetch_param('include_retweets') ? $this->EE->TMPL->fetch_param('include_retweets') : 'true');
 			define('SHOW_REPLIES', $this->EE->TMPL->fetch_param('show_replies') ? $this->EE->TMPL->fetch_param('show_replies') : 'true');
-			define('CACHE_LIMIT', ($this->EE->TMPL->fetch_param('cache_limit') || $this->EE->TMPL->fetch_param('cache_limit') === 0) ? $this->EE->TMPL->fetch_param('cache_limit') : 30);
+			define('CACHE_LIMIT', ($this->EE->TMPL->fetch_param('cache_limit') || $this->EE->TMPL->fetch_param('cache_limit') === "0") ? intval($this->EE->TMPL->fetch_param('cache_limit')) : 30);
 			define('TIME_FORMAT', $this->EE->TMPL->fetch_param('time_format') ? str_replace('%', '', $this->EE->TMPL->fetch_param('time_format')) : 'F m, Y g:i a');
 			define('WORDED_TIMES', $this->EE->TMPL->fetch_param('worded_times') ? $this->EE->TMPL->fetch_param('worded_times') : 'true');
 			define('TWEETS_TO_GRAB', $this->EE->TMPL->fetch_param('tweets_to_grab') ? $this->EE->TMPL->fetch_param('tweets_to_grab') : 10);
@@ -216,11 +218,11 @@
 			?>
 			
 			<ol>
-			{exp:twittero screen_name="your_twitter_username"
-			consumer_key="lDbqIkinxjhfddZlZz456SdsfdfgSkVa4Qg"
-			consumer_secret="hvBAIee46j48dfxu1V18Hhdil80xLEXhQTaTKf3zXfzT5d6Dwb8OM"
-			oauth_token="15032349-vtnAAmEe78gOgXDn5OfsddlarewdNaltSkREMbXA9aD74NR6QyHzO"
-			oauth_token_secret="YqH3rdWX0IOfaSXMEpbpg546gpsdfT8lgx8j44hCnQrcehGpONIpE"}
+			{exp:twittero screen_name="willans"
+			consumer_key="lDbqIkinxjZlZzSSkVa4Qg"
+			consumer_secret="hvBAIee48xu1V8Hil80xLEXhQTaTKzXfzTd6Dwb8OM"
+			oauth_token="15032349-vnAAmEe78gOgXDn5OlNaltSkREMbXA9aDNR6QyHzO"
+			oauth_token_secret="YqH3rWX0IOSXMEpbpggpT8lx8j44hCnQrcehGpONIpE"}
 			<li>{twittero_tweet} {twittero_time}</li>
 			{/exp:twittero}
 			</ol>	
