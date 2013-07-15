@@ -86,12 +86,14 @@
 				
 				if (SHOW_REPLIES == "false") {
 					if ($tweet->in_reply_to_screen_name === null) {
-						$line = str_replace("{twittero_tweet}", linkify($tweet->text), $format);								
+						$line = str_replace("{twittero_tweet}", linkify($tweet->text), $format);
+						$line = str_replace("{twittero_link}", "https://twitter.com/" . SCREEN_NAME . "/status/" . $tweet->id, $line);								
 						$html .= str_replace("{twittero_time}", tweet_time($tweet->created_at), $line);
 						$i++;
 					}
 				} else {
-					$line = str_replace("{twittero_tweet}", linkify($tweet->text), $format);								
+					$line = str_replace("{twittero_tweet}", linkify($tweet->text), $format);
+					$line = str_replace("{twittero_link}", "https://twitter.com/" . SCREEN_NAME . "/status/" . $tweet->id, $line);							
 					$html .= str_replace("{twittero_time}", tweet_time($tweet->created_at), $line);
 					$i++;
 				}
